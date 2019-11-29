@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/LayoutFullWidth.Vertical">
+
+    <LinearLayout
+        android:id="@+id/error_wrapper"
+        style="@style/ErrorWrapper">
+
+        <TextView
+            style="@style/DefaultTextView"
+            android:text="@string/error_title" />
+
+        <Button
+            android:id="@+id/retry"
+            style="@style/DefaultTextView"
+            android:text="@string/error_button" />
+
+    </LinearLayout>
+
+    <ProgressBar
+        android:id="@+id/progress"
+        style="@style/LayoutFullWidth"/>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/images_recycler"
+        style="@style/LayoutFullWidth" />
+
+</LinearLayout>

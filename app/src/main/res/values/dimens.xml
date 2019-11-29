@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Indents -->
+    <dimen name="indent_quarter">4dp</dimen>
+    <dimen name="indent_half">8dp</dimen>
+    <dimen name="indent_normal">16dp</dimen>
+
+    <!-- Avatar -->
+    <dimen name="avatar_size">48dp</dimen>
+
+    <!-- Views sizes -->
+    <dimen name="photo_height">400dp</dimen>
+</resources>

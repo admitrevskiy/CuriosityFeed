@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    style="@style/LayoutFullWidth.Vertical">
+
+    <LinearLayout
+        style="@style/PostHeaderView">
+
+        <ImageView
+            style="@style/AvatarView"
+            android:src="@drawable/avatar"
+            tools:ignore="ContentDescription" />
+
+        <LinearLayout
+            style="@style/LayoutFullWidth.Vertical">
+
+            <TextView
+                android:id="@+id/rover_name"
+                style="@style/LayoutFullWidth"
+                tools:text="Curiosity"/>
+
+            <TextView
+                android:id="@+id/place_and_date"
+                style="@style/LayoutFullWidth"
+                tools:text="Mars • 2019-01-01"/>
+
+        </LinearLayout>
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/image"
+        style="@style/PhotoView" />
+
+</LinearLayout>

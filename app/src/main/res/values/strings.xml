@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">Images</string>
+    <string name="mars_time">Mars • %s • sol %d</string>
+    <string name="error_title">Something is wrong</string>
+    <string name="error_button">Try again?</string>
+</resources>
