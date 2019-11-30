@@ -38,7 +38,6 @@ class Photo(
     val rover: Rover
 
 ) {
-
     override fun toString(): String {
         return "Photo(id=$id, sol=$sol, source='$source', earthDate='$earthDate', rover=$rover)"
     }

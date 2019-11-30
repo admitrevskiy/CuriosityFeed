@@ -2,6 +2,7 @@ package com.github.admitrevskiy.images.ui.activity
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
@@ -10,8 +11,8 @@ import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.github.admitrevskiy.images.R
-import com.github.admitrevskiy.images.model.Photo
-import com.github.admitrevskiy.images.ui.helpers.ImagesAdapter
+import com.github.admitrevskiy.images.model.InitialLoadStatus
+import com.github.admitrevskiy.images.ui.helpers.PhotosAdapter
 import com.github.admitrevskiy.images.viewmodel.MainViewModel
 import org.koin.android.viewmodel.ext.android.viewModel
 
@@ -25,10 +26,9 @@ class MainActivity : AppCompatActivity() {
     private lateinit var errorWrapper: ViewGroup
     private lateinit var retryButton: Button
     private lateinit var progressBar: ProgressBar
-    private lateinit var adapter: ImagesAdapter
+    private lateinit var adapter: PhotosAdapter
 
     /** Photos to be passed into recycler */
-    private val photo: ArrayList<Photo> = ArrayList()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,7 +37,7 @@ class MainActivity : AppCompatActivity() {
             layoutManager = LinearLayoutManager(context)
         }
 
-        adapter = ImagesAdapter(photo, viewModel::loadPhotos)
+        adapter = PhotosAdapter(this, viewModel.photosLiveData, viewModel::loadPhotos)
         recycler.adapter = adapter
         progressBar = findViewById(R.id.progress)
         errorWrapper = findViewById(R.id.error_wrapper)
@@ -47,27 +47,28 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        viewModel.photosLiveData.observe(this, Observer {
-            photo.addAll(it)
-            adapter.notifyDataSetChanged()
-        })
-
-        viewModel.progressLiveData.observe(this, Observer {
-            progressBar.visibility = if (it) View.VISIBLE else View.GONE
-        })
-
-        viewModel.errorLiveData.observe(this, Observer {
-            errorWrapper.visibility = if (it) View.VISIBLE else View.GONE
-        })
-
-        // Let's check if we already have some photos loaded
-        // There are no needs to trigger loading after screen rotation
-        viewModel.photosLiveData.value?.apply {
-            if (this.isNotEmpty()) {
-                viewModel.loadPhotos()
-            } else {
-                photo.addAll(this)
+        viewModel.initialLoadStatusLiveData.observe(this, Observer {
+            when (it) {
+                InitialLoadStatus.IN_PROGRESS -> {
+                    progressBar.visibility = View.VISIBLE
+                    errorWrapper.visibility = View.GONE
+                    recycler.visibility = View.GONE
+                }
+                InitialLoadStatus.ERROR -> {
+                    errorWrapper.visibility = View.VISIBLE
+                    progressBar.visibility = View.GONE
+                    recycler.visibility = View.GONE
+                }
+                InitialLoadStatus.LOADED -> {
+                    recycler.visibility = View.VISIBLE
+                    progressBar.visibility = View.GONE
+                    errorWrapper.visibility = View.GONE
+                }
+                else -> {
+                    Log.w("LiveDataObserver", "Bad value posted")}
             }
-        } ?: viewModel.loadPhotos()
+        })
+
+        viewModel.onResume()
     }
 }

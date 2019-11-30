@@ -1,6 +1,6 @@
 ### Curiosity photo booth
 
-This is a simple app to get Mars photos from [NASA](https://api.nasa.gov) servers 
+A simple application to download Mars photos taken by the Curiosity Rover from [NASA](https://api.nasa.gov) servers. 
 
 ### API key
 
@@ -12,6 +12,7 @@ Visit official [NASA API](https://api.nasa.gov) site to generate API key
 
 - Kotlin
 - RxJava2
+- Koin
 - Retrofit
 - OkHttp
 - Glide
@@ -19,5 +20,5 @@ Visit official [NASA API](https://api.nasa.gov) site to generate API key
 - MVVM
 
 #### TODO list
-- [] Open image on tap
-- [] Handle network issues
+- [ ] Open image on tap
+- [ ] Add notification/snack/whatever for a failed requests

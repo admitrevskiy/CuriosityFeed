@@ -7,6 +7,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.DataSource
@@ -18,11 +21,18 @@ import com.bumptech.glide.request.target.Target
 import com.github.admitrevskiy.images.R
 import com.github.admitrevskiy.images.model.Photo
 
-class ImagesAdapter(private val photos: List<Photo>,
+class PhotosAdapter(owner: LifecycleOwner,
+                    private val photos: MutableLiveData<List<Photo>>,
                     sizeListener: () -> Unit
-) : RecyclerView.Adapter<ImagesAdapter.ViewHolder>() {
+) : RecyclerView.Adapter<PhotosAdapter.ViewHolder>() {
 
-    private val tag = "ImagesAdapter"
+    init {
+        photos.observe(owner, Observer {
+            notifyDataSetChanged()
+        })
+    }
+
+    private val tag = "PhotosAdapter"
     private val loadController = RecyclerLoadController(sizeListener, ::getItemCount)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -30,10 +40,10 @@ class ImagesAdapter(private val photos: List<Photo>,
         return ViewHolder(view)
     }
 
-    override fun getItemCount(): Int = photos.size
+    override fun getItemCount(): Int = photos.value?.size ?: 0
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        photos[position].apply {
+        photos.value?.get(position)?.apply {
             Log.d(tag, "Load image. Position: $position; URL: ${this.source}")
             holder.rover.text = this.rover.name
             holder.placeAndDate.apply {
@@ -42,9 +52,9 @@ class ImagesAdapter(private val photos: List<Photo>,
 
             Glide.with(holder.imageView)
                 .load(this.source)
-                .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC)            // Cache images to disk
-                .apply(RequestOptions().override(300, 400))  // Reduce quality
-                .thumbnail(0.5f)
+                .diskCacheStrategy(DiskCacheStrategy.AUTOMATIC) // Cache images to disk
+                .apply(RequestOptions().override(300, 400))     // Reduce sizes
+                .thumbnail(0.5f)                                // Show image with bad quality if there is no ability to load full image
                 .placeholder(R.drawable.ic_mars)
                 .listener(object: RequestListener<Drawable> {
                     override fun onLoadFailed(e: GlideException?,

@@ -3,6 +3,7 @@ package com.github.admitrevskiy.images.viewmodel
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.github.admitrevskiy.images.model.InitialLoadStatus
 import com.github.admitrevskiy.images.model.Photo
 import com.github.admitrevskiy.images.model.rest.NasaResponse
 import com.github.admitrevskiy.images.repository.PhotoRepository
@@ -14,20 +15,33 @@ import retrofit2.HttpException
 class MainViewModel(private val repository: PhotoRepository) : ViewModel() {
 
     val photosLiveData: MutableLiveData<List<Photo>> = MutableLiveData()
-    val errorLiveData: MutableLiveData<Boolean> = MutableLiveData()
-    val progressLiveData: MutableLiveData<Boolean> = MutableLiveData()
+    val initialLoadStatusLiveData: MutableLiveData<InitialLoadStatus> = MutableLiveData()
 
     private val disposable = CompositeDisposable()
     private val loadedPhotos = ArrayList<Photo>()
+
     private val tag = "MainViewModel"
 
     private var page : Int = 0
     private var sol : Int = 1
 
+    override fun onCleared() {
+        super.onCleared()
+        disposable.clear()
+    }
+
+    /**
+     * Trigger loading if it was not triggered before
+     */
+    fun onResume() {
+        if (initialLoadStatusLiveData.value == null) {
+            loadPhotos()
+        }
+    }
+
     fun loadPhotos() {
         if (loadedPhotos.isEmpty()) {
-            progressLiveData.postValue(true)
-            errorLiveData.postValue(false)
+            initialLoadStatusLiveData.postValue(InitialLoadStatus.IN_PROGRESS)
         }
         page++
         disposable.add(repository
@@ -40,26 +54,21 @@ class MainViewModel(private val repository: PhotoRepository) : ViewModel() {
             ))
     }
 
-    override fun onCleared() {
-        super.onCleared()
-        disposable.clear()
-    }
-
     private fun handleError(t: Throwable) {
         Log.w(tag, "Failed to load photos", t)
         when (t) {
             is HttpException ->  {
                 when (t.code()) {
-                    401         -> {} // Unauthorized
-                    429         -> {} // Too many requests
+                    401         -> {} // Unauthorized (Bad key)
+                    429         -> {} // Too many requests (Slow down, swipe master)
                     in 400..499 -> {} // Client error
                     in 500..599 -> {} // Server error
+                    else        -> {} // WTF?
                 }
             }
         }
-        progressLiveData.postValue(false)
-        if (loadedPhotos.isEmpty()) {
-            errorLiveData.postValue(true)
+        if (initialLoadStatusLiveData.value != InitialLoadStatus.LOADED) {
+            initialLoadStatusLiveData.postValue(InitialLoadStatus.ERROR)
         }
     }
 
@@ -74,7 +83,7 @@ class MainViewModel(private val repository: PhotoRepository) : ViewModel() {
         response.photos.apply {
             if (size > 0) {
                 postPhotos(this)
-            } else if (loadedPhotos.isNotEmpty()) {
+            } else {
                 loadNextSol()
             }
         }
@@ -90,12 +99,13 @@ class MainViewModel(private val repository: PhotoRepository) : ViewModel() {
     }
 
     /**
-     * Post new photos from server
+     * Posts new photos loaded from server
      */
     private fun postPhotos(loaded: List<Photo>) {
         loadedPhotos.addAll(loaded)
         photosLiveData.postValue(loadedPhotos)
-        errorLiveData.postValue(false)
-        progressLiveData.postValue(false)
+        if (initialLoadStatusLiveData.value != InitialLoadStatus.LOADED) {
+            initialLoadStatusLiveData.postValue(InitialLoadStatus.LOADED)
+        }
     }
 }

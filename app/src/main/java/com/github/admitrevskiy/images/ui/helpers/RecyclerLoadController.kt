@@ -3,11 +3,11 @@ package com.github.admitrevskiy.images.ui.helpers
 import android.util.Log
 
 /**
- * This controller is necessary to avoid extra photos pack load. Register it as data observer
+ * This controller is necessary to avoid extra photos pack load.
  */
 internal class RecyclerLoadController(private val sizeListener: () -> Unit,
                                       private val getItemCount: () -> Int,
-                                      private val loadFactor: Int = 5) {
+                                      private val loadFactor: Int = 3) {
 
     private val tag = "RecyclerLoadController"
 
